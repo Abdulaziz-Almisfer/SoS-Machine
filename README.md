@@ -1,36 +1,39 @@
+## SoS Machine
+
 SoS Machine — Smart Offensive Simulation
+Turn raw PowerShell history into actionable threat intelligence. Fast, local, read-only, and built for red teams, IR, and threat hunters.
 
-SoS Machine is a focused, no-nonsense tool that scans PowerShell history across Windows users, detects offensive TTPs, and produces a single colorized HTML report that helps red teams, IR, and threat hunters find the real signals fast.
+TL;DR
 
-TL;DR (one-liner)
+SoS Machine scans PowerShell PSReadLine history across Windows users, applies a broad TTP-focused ruleset, and produces a single colorized HTML triage report (Critical / High / Medium / Low). No agents, no changes to the host — just clear signals, not noise.
 
-SoS Machine turns messy PowerShell history into actionable threat intelligence — fast, local, and read-only.
+Key Features
 
-Quick pitch (short LinkedIn / tweet)
+Scans PSReadLine history for all users on a host (run as Administrator for full coverage).
 
-SoS Machine: fast post-exploitation intelligence from PowerShell history. Scans all users, detects C2/cradles/AD enumeration/persistence, and exports a colorized HTML report. No external deps — just run it and get the signal, not noise.
+Large practical ruleset covering common offensive TTPs:
 
-Why it exists
+execution & obfuscation, download cradles, AD enumeration, credential theft, persistence, AV tampering, lateral movement, shellcode indicators, and more.
 
-PowerShell is both attacker favorite and a rich forensic source. Humans can't comb through thousands of commands quickly; SoS Machine automates detection of meaningful TTPs (C2 frameworks, encoded payloads, AD tools, credential theft, persistence, AV tampering) and shows the results in one clear report. It’s designed for labs, red team post-checks, and first-pass triage during IR.
+Produces a single HTML report with:
 
-Key features
+summary, findings (colored by severity), and a full command list for context.
 
-✔️ Scans PSReadLine history for all users on a Windows host (run as admin for full coverage).
+Read-only: does not change system configuration or install components.
 
-✔️ Large, practical rule set for TTPs: encoded commands, IEX cradles, PowerView/SharpHound, Mimikatz indicators, persistence patterns, AV tampering, download/exfil patterns, and more.
+Zero external dependencies (pure Python), portable and easy to run.
 
-✔️ Single HTML report with colorized severity (Critical / High / Medium / Low) and matched rule explanations.
+Why SoS Machine
 
-✔️ Read-only: the tool does not change system config or install agents.
+PowerShell is both an attacker’s favorite and a rich forensic source. Humans can’t efficiently triage thousands of shell commands. SoS Machine automates that first-pass triage: it highlights the suspicious commands and explains why they matter so you can prioritize follow-up (Sysmon, memory capture, imaging).
 
-✔️ Zero external dependencies (pure Python) — portable and simple to run.
+Usage
 
-Example usage
+Place the script on the target or a management box that can access the target.
 
-Place SoS_Machine.py on the host (or on a management box that can reach the host).
+Run PowerShell as Administrator (for full user coverage).
 
-Run PowerShell as Administrator (for full user coverage) and execute:
+Execute:
 
 python SoS_Machine.py
 
@@ -39,42 +42,54 @@ Open the generated report:
 
 pshistory_allusers_fullrules_report.html
 
-What it detects (high-level)
+What it detects (high level)
 
-Execution & obfuscation: IEX, -EncodedCommand, Invoke-Expression, Base64 decode patterns.
+Execution & obfuscation: IEX, -EncodedCommand, Invoke-Expression, Base64 decoding.
 
 Download & staging: Invoke-WebRequest, certutil, bitsadmin, curl/wget, download+execute cradles.
 
 AD enumeration & collection: Get-Net*, Get-AD*, PowerView.ps1, SharpHound.
 
-Credential access: Get-Credential, Export-PfxCertificate, mimikatz, sekurlsa.
+Credential access: Get-Credential, certificate export, mimikatz, sekurlsa.
 
 Lateral movement: Invoke-Command, psexec, wmic, Enter-PSSession.
 
 Persistence & evasion: scheduled tasks, service creation, registry Run keys, Defender exclusions, event log clearing.
 
-Shellcode & injection indicators and other suspicious API calls or patterns.
+Shellcode & injection: reflective loading, memory APIs, injection primitives.
+
+Network beacon/exfil patterns: HTTP POST/GET to external hosts, REST beacons.
 
 Output
 
-Single HTML file with:
+Single colorized HTML file: pshistory_allusers_fullrules_report.html
 
-Summary (total commands, users, counts by severity)
+Summary (total commands, users, severity counts)
 
-Findings table (Critical / High / Medium) with matched regex and reason
+Findings table (Critical / High / Medium) with matched pattern and reason
 
 Full commands table for context
 
 Recommended workflow
 
-Run SoS Machine immediately after an engagement or as a first step in IR to highlight suspicious commands.
+Run SoS Machine as the first triage step after an engagement or suspected compromise.
 
-Use findings to prioritize which hosts to image or which logs/events to pull next (Sysmon, EVTX).
+Use findings to prioritize hosts for deeper collection (memory, sysmon, evtx).
 
-Tune the ruleset to your environment: whitelist legitimate admin tooling and add organization-specific telemetry if needed.
+Tune the ruleset to your environment: whitelist legitimate admin tools and add organization-specific telemetry.
 
-Security & ethics
+Integrate outputs into your IR pipeline or SIEM as needed.
 
-Designed for authorized use only. Run on systems you own, control, or have written permission to test.
+Security & Ethics
 
-The tool reads potentially sensitive data (transcripts / command contents). Treat outputs as sensitive and store securely.
+Authorized use only. Run SoS Machine on systems you own or have explicit permission to test.
+
+The tool reads potentially sensitive command contents. Treat report outputs as sensitive data and store them securely.
+
+SoS Machine is a triage tool — it does not replace dedicated EDR/forensics tooling.
+
+Extending & Contributing
+
+Rules are intentionally practical and editable. Add or tune regex patterns to match your environment.
+
+Contributions welcome: add new detections, reduce false positives, or add integration hooks (CSV export, SIEM exporters, central aggregator).
